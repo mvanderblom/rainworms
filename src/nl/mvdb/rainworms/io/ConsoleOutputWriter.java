@@ -1,4 +1,4 @@
-package nl.mvdb.regenwormen.io;
+package nl.mvdb.rainworms.io;
 
 public class ConsoleOutputWriter implements UserOutputWriter {
 

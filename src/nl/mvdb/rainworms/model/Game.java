@@ -1,4 +1,4 @@
-package nl.mvdb.regenwormen;
+package nl.mvdb.rainworms.model;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -8,10 +8,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import nl.mvdb.regenwormen.io.UserInputReader;
-import nl.mvdb.regenwormen.io.UserOutputWriter;
+import nl.mvdb.rainworms.io.UserInputReader;
+import nl.mvdb.rainworms.io.UserOutputWriter;
 
-public class RegenWormenGame {
+public class Game {
 
 	private static final BigInteger WORM_NUMERICAL = BigInteger.valueOf(6);
 	private static final BigInteger NEXT_TURN_NUMERICAL = BigInteger.valueOf(0);
@@ -19,7 +19,7 @@ public class RegenWormenGame {
 	private UserInputReader reader;
 	private UserOutputWriter writer;
 
-	public RegenWormenGame(UserInputReader reader, UserOutputWriter writer) {
+	public Game(UserInputReader reader, UserOutputWriter writer) {
 		this.reader = reader;
 		this.writer = writer;
 	}
@@ -30,7 +30,7 @@ public class RegenWormenGame {
 		// game loop
 		while (true) {
 			int numberOfDice = 8;
-			Map<BigInteger, Integer> apartGelegdeDobbelstenen = new LinkedHashMap<>();
+			Map<BigInteger, Integer> selectedDice = new LinkedHashMap<>();
 
 			if (!reader.bool("Klaar voor de volgende beurt?", "J", "N"))
 				break;
@@ -43,32 +43,32 @@ public class RegenWormenGame {
 				}
 
 				// Gooien
-				List<BigInteger> worp = throwDice(numberOfDice);
+				List<BigInteger> throw_ = throwDice(numberOfDice);
 
 				// Apart leggen
-				BigInteger apartTeLeggen = null;
-				while (!isValid(apartGelegdeDobbelstenen, worp, apartTeLeggen)) {
-					if (apartTeLeggen != null) {
-						if (apartGelegdeDobbelstenen.containsKey(apartTeLeggen))
+				BigInteger selectedDie = null;
+				while (!isValid(selectedDice, throw_, selectedDie)) {
+					if (selectedDie != null) {
+						if (selectedDice.containsKey(selectedDie))
 							writer.error("Deze dobbelstenen heb je al apart gelegd.");
-						else if (!worp.contains(apartTeLeggen))
+						else if (!throw_.contains(selectedDie))
 							writer.error("Deze dobbelstenen heb je niet gegooid.");
 					}
-					apartTeLeggen = reader.integer("Wat wil je apart leggen? (1 t/m 6, 0 voor volgende beurt)");
+					selectedDie = reader.integer("Wat wil je apart leggen? (1 t/m 6, 0 voor volgende beurt)");
 				}
 
-				if (NEXT_TURN_NUMERICAL.equals(apartTeLeggen))
+				if (NEXT_TURN_NUMERICAL.equals(selectedDie))
 					break;
 
 				// State bijwerken
-				Integer aantalInWorp = countDice(worp, apartTeLeggen);
-				apartGelegdeDobbelstenen.put(apartTeLeggen, aantalInWorp);
-				numberOfDice -= aantalInWorp;
+				Integer count = countDice(throw_, selectedDie);
+				selectedDice.put(selectedDie, count);
+				numberOfDice -= count;
 
-				int total = getTotal(apartGelegdeDobbelstenen);
+				int total = getTotal(selectedDice);
 
 				// Endstate: geldige worp, nog een keer?
-				if (total >= 21 && apartGelegdeDobbelstenen.containsKey(WORM_NUMERICAL) && numberOfDice > 0) {
+				if (total >= 21 && selectedDice.containsKey(WORM_NUMERICAL) && numberOfDice > 0) {
 					boolean nogEenWorp = reader.bool("Er zijn nog " + numberOfDice + " dobbelsten(en) over. Nog een keer gooien?", "J", "N");
 					if (!nogEenWorp)
 						break;
@@ -77,10 +77,10 @@ public class RegenWormenGame {
 		}
 	}
 
-	private boolean isValid(Map<BigInteger, Integer> apartGelegdeDobbelstenen, List<BigInteger> worp, BigInteger apartTeLeggen) {
-		if (NEXT_TURN_NUMERICAL.equals(apartTeLeggen))
+	private boolean isValid(Map<BigInteger, Integer> selectedDice, List<BigInteger> throw_, BigInteger selectedDie) {
+		if (NEXT_TURN_NUMERICAL.equals(selectedDie))
 			return true;
-		if (!apartGelegdeDobbelstenen.containsKey(apartTeLeggen) && worp.contains(apartTeLeggen))
+		if (!selectedDice.containsKey(selectedDie) && throw_.contains(selectedDie))
 			return true;
 		return false;
 	}
@@ -90,14 +90,14 @@ public class RegenWormenGame {
 		return Integer.valueOf("" + count);
 	}
 
-	private int getTotal(Map<BigInteger, Integer> map) {
+	private int getTotal(Map<BigInteger, Integer> selectedDice) {
 		int total = 0;
 		writer.info("Apart gelegd:");
-		List<BigInteger> keySet = map.keySet().stream().sorted().collect(Collectors.toList());
+		List<BigInteger> keySet = selectedDice.keySet().stream().sorted().collect(Collectors.toList());
 		for (BigInteger dobbelSteen : keySet) {
 			boolean isRegenworm = dobbelSteen.equals(WORM_NUMERICAL);
-			total += map.get(dobbelSteen) * (isRegenworm ? 5 : dobbelSteen.intValue());
-			writer.info(map.get(dobbelSteen) + " keer een " + (isRegenworm ? "Regenworm" : dobbelSteen.intValue()));
+			total += selectedDice.get(dobbelSteen) * (isRegenworm ? 5 : dobbelSteen.intValue());
+			writer.info(selectedDice.get(dobbelSteen) + " keer een " + (isRegenworm ? "Regenworm" : dobbelSteen.intValue()));
 		}
 		writer.info("Totaal: " + total);
 		return total;

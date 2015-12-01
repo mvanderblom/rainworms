@@ -1,4 +1,4 @@
-package nl.mvdb.regenwormen.io;
+package nl.mvdb.rainworms.io;
 
 import java.math.BigInteger;
 import java.util.Scanner;
