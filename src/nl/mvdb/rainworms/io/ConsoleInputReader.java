@@ -48,4 +48,10 @@ public class ConsoleInputReader implements UserInputReader {
 		return new BigInteger(userInput);
 	}
 
+	@Override
+	public String string(String question) {
+		System.out.println(question);
+		return scanner.nextLine();
+	}
+
 }

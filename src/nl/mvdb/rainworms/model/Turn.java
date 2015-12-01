@@ -23,7 +23,7 @@ public class Turn {
 	}
 
 	public void execute(GameState gameState) {
-		if (!reader.bool("Klaar voor de volgende beurt?", "J", "N"))
+		if (!reader.bool(gameState.getActivePlayer().getName() + ", ben je klaar voor jouw volgende beurt?", "J", "N"))
 			return;
 
 		TurnState state = gameState.getTurnState();
