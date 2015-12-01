@@ -42,10 +42,10 @@ public class Turn {
 			BigInteger selectedDie = null;
 			while (!isValid(state.getSelectedDice(), throw_, selectedDie)) {
 				if (selectedDie != null) {
-					if (state.getSelectedDice().containsKey(selectedDie))
-						writer.error("Deze dobbelstenen heb je al apart gelegd.");
-					else if (!throw_.contains(selectedDie))
+					if (!throw_.contains(selectedDie))
 						writer.error("Deze dobbelstenen heb je niet gegooid.");
+					else if (state.getSelectedDice().containsKey(selectedDie))
+						writer.error("Deze dobbelstenen heb je al apart gelegd.");
 				}
 				selectedDie = reader.integer("Wat wil je apart leggen? (1 t/m 6, 0 voor volgende beurt)");
 			}
