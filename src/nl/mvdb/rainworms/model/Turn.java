@@ -22,11 +22,11 @@ public class Turn {
 		this.writer = writer;
 	}
 
-	public void execute(GameState state) {
+	public void execute(GameState gameState) {
 		if (!reader.bool("Klaar voor de volgende beurt?", "J", "N"))
 			return;
 
-		state.initTurn();
+		TurnState state = gameState.getTurnState();
 
 		// beurt loop
 		while (true) {

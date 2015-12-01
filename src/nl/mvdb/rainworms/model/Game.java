@@ -16,11 +16,13 @@ public class Game {
 	public void start() {
 		writer.info("Hallo regenwormen!");
 		GameState gameState = new GameState();
-		boolean nextTurn = true;
-		while (nextTurn) {
+		while (true) {
+			gameState.initTurnState();
 			Turn turn = new Turn(reader, writer);
 			turn.execute(gameState);
-			nextTurn = gameState.shouldNextTurnTakePlace();
+
+			if (!gameState.shouldNextTurnTakePlace())
+				break;
 		}
 	}
 
