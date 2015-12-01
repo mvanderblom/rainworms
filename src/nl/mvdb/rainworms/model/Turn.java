@@ -3,7 +3,6 @@ package nl.mvdb.rainworms.model;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -18,33 +17,32 @@ public class Turn {
 	private UserInputReader reader;
 	private UserOutputWriter writer;
 
-	private int numberOfDice = 8;
-	private Map<BigInteger, Integer> selectedDice = new LinkedHashMap<>();
-
 	public Turn(UserInputReader reader, UserOutputWriter writer) {
 		this.reader = reader;
 		this.writer = writer;
 	}
 
-	public boolean execute() {
+	public void execute(GameState state) {
 		if (!reader.bool("Klaar voor de volgende beurt?", "J", "N"))
-			return false;
+			return;
+
+		state.initTurn();
 
 		// beurt loop
 		while (true) {
-			if (numberOfDice == 0) {
+			if (state.getNumberOfDice() == 0) {
 				writer.error("Er zijn geen dobbelstenen mee over...");
 				break;
 			}
 
 			// Gooien
-			List<BigInteger> throw_ = throwDice(numberOfDice);
+			List<BigInteger> throw_ = throwDice(state.getNumberOfDice());
 
 			// Apart leggen
 			BigInteger selectedDie = null;
-			while (!isValid(selectedDice, throw_, selectedDie)) {
+			while (!isValid(state.getSelectedDice(), throw_, selectedDie)) {
 				if (selectedDie != null) {
-					if (selectedDice.containsKey(selectedDie))
+					if (state.getSelectedDice().containsKey(selectedDie))
 						writer.error("Deze dobbelstenen heb je al apart gelegd.");
 					else if (!throw_.contains(selectedDie))
 						writer.error("Deze dobbelstenen heb je niet gegooid.");
@@ -57,19 +55,18 @@ public class Turn {
 
 			// State bijwerken
 			Integer count = countDice(throw_, selectedDie);
-			selectedDice.put(selectedDie, count);
-			numberOfDice -= count;
+			state.getSelectedDice().put(selectedDie, count);
+			state.setNumberOfDice(state.getNumberOfDice() - count);
 
-			int total = getTotal(selectedDice);
+			int total = getTotal(state.getSelectedDice());
 
 			// Endstate: geldige worp, nog een keer?
-			if (total >= 21 && selectedDice.containsKey(WORM_NUMERICAL) && numberOfDice > 0) {
-				boolean nogEenWorp = reader.bool("Er zijn nog " + numberOfDice + " dobbelsten(en) over. Nog een keer gooien?", "J", "N");
+			if (total >= 21 && state.getSelectedDice().containsKey(WORM_NUMERICAL) && state.getNumberOfDice() > 0) {
+				boolean nogEenWorp = reader.bool("Er zijn nog " + state.getNumberOfDice() + " dobbelsten(en) over. Nog een keer gooien?", "J", "N");
 				if (!nogEenWorp)
 					break;
 			}
 		}
-		return true;
 	}
 
 	private boolean isValid(Map<BigInteger, Integer> selectedDice, List<BigInteger> throw_, BigInteger selectedDie) {

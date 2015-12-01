@@ -15,11 +15,12 @@ public class Game {
 
 	public void start() {
 		writer.info("Hallo regenwormen!");
-
+		GameState gameState = new GameState();
 		boolean nextTurn = true;
 		while (nextTurn) {
 			Turn turn = new Turn(reader, writer);
-			nextTurn = turn.execute();
+			turn.execute(gameState);
+			nextTurn = gameState.shouldNextTurnTakePlace();
 		}
 	}
 
