@@ -7,12 +7,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import nl.mvdb.rainworms.Constants;
 import nl.mvdb.rainworms.io.UserInputReader;
 import nl.mvdb.rainworms.io.UserOutputWriter;
 
-public class Turn {
-	private static final BigInteger WORM_NUMERICAL = BigInteger.valueOf(6);
-	private static final BigInteger NEXT_TURN_NUMERICAL = BigInteger.valueOf(0);
+public class Turn implements Constants {
 
 	private UserInputReader reader;
 	private UserOutputWriter writer;
